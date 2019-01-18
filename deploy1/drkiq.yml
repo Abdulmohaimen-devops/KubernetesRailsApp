@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: drkiq
+spec:
+  ports:
+  - port: 8000
+    protocol: TCP
+  selector:
+    app: drkiq
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: drkiq
+spec:
+  selector:
+    matchLabels:
+      app: drkiq
+  template:
+    metadata:
+      labels:
+        app: drkiq
+    spec:
+      containers:
+      - name: drkiq
+        image: app
+        imagePullPolicy: Never
+        ## envs used in app config file exract from secret
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: secret-app
+              key: DATABASE_URL
+        - name: SECRET_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: secret-app
+              key: SECRET_TOKEN
+        - name: WORKER_PROCESSES
+          valueFrom:
+            secretKeyRef:
+              name: secret-app
+              key: WORKER_PROCESSES
+        - name: LISTEN_ON
+          valueFrom:
+            secretKeyRef:
+              name: secret-app
+              key: LISTEN_ON
+        - name: CACHE_URL
+          valueFrom:
+            secretKeyRef:
+              name: secret-app
+              key: CACHE_URL
+        - name: JOB_WORKER_URL
+          valueFrom:
+            secretKeyRef:
+              name: secret-app
+              key: JOB_WORKER_URL
+
+        # port for container
+        ports:
+        - containerPort: 8000
