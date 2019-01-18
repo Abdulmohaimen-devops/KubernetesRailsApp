@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: drkiq
+spec:
+  ports:
+  - port: 8000
+    protocol: TCP
+  selector:
+    app: drkiq
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: drkiq
+spec:
+  selector:
+    matchLabels:
+      app: drkiq
+  template:
+    metadata:
+      labels:
+        app: drkiq
+    spec:
+      containers:
+      - name: drkiq
+        image: app
+        imagePullPolicy: Never
+
+        #all vars exract from config map named vars-config and is used for app
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: vars-config 
+              key: DATABASE_URL
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: vars-config
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: vars-config
+              key: POSTGRES_PASSWORD
+        - name: CACHE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: vars-config
+              key: CACHE_URL
+        - name: JOB_WORKER_URL
+          valueFrom:
+            configMapKeyRef:
+              name: vars-config
+              key: JOB_WORKER_URL
+        - name: WORKER_PROCESSES
+          valueFrom:
+            configMapKeyRef:
+              name: vars-config
+              key: WORKER_PROCESSES
+        - name: LISTEN_ON
+          valueFrom:
+            configMapKeyRef:
+              name: vars-config
+              key: LISTEN_ON
+        - name: SECRET_TOKEN
+          valueFrom:
+            configMapKeyRef:
+              name: vars-config
+              key: SECRET_TOKEN
+        # port for app continer
+        ports:
+        - containerPort: 8000
